@@ -1,121 +1,54 @@
-import * as THREE from "three";
+/**
+ * parthh.me — 3D Cube Portfolio
+ * Main entry point
+ */
 
-import { createScene } from "./scene/scene.js";
-
-import { createCamera } from "./scene/camera.js";
-
-import "./style.css";
-
-
-
-const scene = createScene();
+import './style.css';
+import { createFaces } from './faces.js';
+import { DragController } from './drag.js';
+import { initParticles } from './particles.js';
 
 
-const camera = createCamera();
+/* ==================== Build DOM ==================== */
+
+const app = document.getElementById('app');
+
+// 1. Particle background canvas
+const particleCanvas = document.createElement('canvas');
+particleCanvas.id = 'particle-canvas';
+app.appendChild(particleCanvas);
+
+// 2. Scene wrapper (provides CSS perspective)
+const scene = document.createElement('div');
+scene.className = 'scene';
+
+// 3. The cube
+const cube = document.createElement('div');
+cube.className = 'cube';
+
+// 4. Create all 6 faces and append
+const faces = createFaces();
+Object.values(faces).forEach((face) => cube.appendChild(face));
+
+scene.appendChild(cube);
+app.appendChild(scene);
+
+// 5. Drag-to-explore hint
+const hint = document.createElement('div');
+hint.className = 'hint';
+hint.innerHTML = '<span class="hint-icon">👆</span> Drag to explore';
+app.appendChild(hint);
 
 
+/* ==================== Initialise Systems ==================== */
 
-const renderer = new THREE.WebGLRenderer({
+// Particle starfield
+initParticles(particleCanvas);
 
-    antialias:true
+// Drag-to-rotate controller
+const drag = new DragController(document.body, cube);
 
+drag.onFirstDrag(() => {
+  hint.classList.add('hidden');
+  setTimeout(() => hint.remove(), 1200);
 });
-
-
-renderer.setSize(
-
-    window.innerWidth,
-
-    window.innerHeight
-
-);
-
-
-renderer.setPixelRatio(
-    window.devicePixelRatio
-);
-
-
-
-document.body.appendChild(
-    renderer.domElement
-);
-
-
-
-
-
-function animate(){
-
-
-    requestAnimationFrame(
-        animate
-    );
-
-
-    const object = scene.userData.object;
-
-
-
-    // rotation
-
-    object.rotation.x += 0.004;
-
-    object.rotation.y += 0.008;
-
-
-
-    // floating
-
-    object.position.y =
-        Math.sin(
-            Date.now()*0.002
-        ) * 0.25;
-
-
-
-    renderer.render(
-
-        scene,
-
-        camera
-
-    );
-
-
-}
-
-
-animate();
-
-
-
-
-
-// responsive
-
-window.addEventListener(
-    "resize",
-    ()=>{
-
-
-        camera.aspect =
-        window.innerWidth /
-        window.innerHeight;
-
-
-        camera.updateProjectionMatrix();
-
-
-
-        renderer.setSize(
-
-            window.innerWidth,
-
-            window.innerHeight
-
-        );
-
-
-    }
-);
